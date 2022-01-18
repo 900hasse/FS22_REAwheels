@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="63">
+    <author>900Hasse</author>
+	<version>1.1.0.0</version>
+	<title>
+        <en>REA22 Wheels</en>
+    </title>
+    <description>
+        <en>
+<![CDATA[The goal of this mod is to make the game feel more realistic and
+customizing the vehicle for the task more rewarding.
+The goal is to make the mod universal.
+This mod supports multiplayer and dedicated servers.
+No changes in XML is needed. Some data from XML is overwritten!
+
+In the base game many vehicles does not take tiretype into consideration making for example
+the Manitou MC18 Forklift recive the same tire friction as a tractor.
+This mod fill the missing data based on tiretrack index making it universal.
+Different tiretypes now act completely different on different ground types and
+suffers differently on rain and sinking into the ground.
+This mod supports the 4 standard tiretypes: MUD, STREET, OFFROAD and CRAWLERS!
+Calculates friction based on size of tire making wide tires, duals and tracks worth the money for
+heavy fieldwork but the narrows suffers making it ideal for easier tasks in later growth state.
+Tire friction is calculated using width and radius.
+Track friction is calculated using width and track lenght.
+Adds rolling and sideway resistance meening: 
+More wheel load, small tires and soft ground = more force needed for pulling or pushing.
+Less wheel load, large tires and hard ground = less force needed for pulling or pushing.
+Front axel is no longer by default locked when a frontloader is attached.
+Deformation of tires is increased.
+
+Added support for "REA Dynamic dirt", driving into standing water
+created by "REA Dynamic dirt" decrease friction and increase sink of wheels.
+
+1.1.0.0
+Corrected error where moving speed of wheel was measured in the wrong position
+
+
+]]>
+</en>
+<de>
+<![CDATA[Das Ziel dieses Mods ist es, das Spiel realistischer zu machen und
+das Anpassen des Fahrzeugs für die Aufgabe lohnender.
+Das Ziel ist es, den Mod universell zu machen.
+Dieser Mod unterstützt Multiplayer und dedizierte Server.
+Es sind keine XML-Änderungen erforderlich. Einige Daten aus XML werden überschrieben!
+
+Im Basisspiel berücksichtigen viele Fahrzeuge zum Beispiel den Reifentyp nicht
+Der Manitou MC18 Gabelstapler erhält die gleiche Reifenreibung wie ein Traktor.
+Dieser Mod füllt die fehlenden Daten basierend auf dem Reifenspurindex und macht ihn universell.
+Unterschiedliche Reifentypen verhalten sich jetzt auf unterschiedlichen Bodenarten völlig unterschiedlich und
+leidet unterschiedlich unter Regen und Einsinken im Boden.
+Dieser Mod unterstützt die 4 Standardreifentypen: MUD, STREET, OFFROAD und CRAWLERS!
+Berechnet die Reibung basierend auf der Reifengröße, wodurch Breitreifen, Doppelreifen und Ketten das Geld wert sind
+schwere Feldarbeit, aber die Enge leidet, was es ideal für leichtere Aufgaben im späteren Wachstumsstadium macht.
+Die Reifenreibung wird anhand von Breite und Radius berechnet.
+Die Kettenreibung wird anhand von Breite und Kettenlänge berechnet.
+Fügt Roll- und Seitenwiderstand hinzu, was bedeutet:
+Mehr Radlast, kleine Reifen und weicher Untergrund = mehr Kraftaufwand beim Ziehen oder Schieben.
+Weniger Radlast, große Reifen und harter Boden = weniger Kraftaufwand beim Ziehen oder Schieben.
+Die Vorderachse ist nicht mehr standardmäßig gesperrt, wenn ein Frontlader angebaut ist.
+Die Verformung der Reifen wird erhöht.
+
+Unterstützung für "REA Dynamic Dirt", das Fahren in stehendes Wasser, hinzugefügt
+durch "REA Dynamic Dirt" erzeugt, verringern die Reibung und erhöhen das Einsinken der Räder.
+]]>
+</de>
+    </description>
+	<l10n>
+	</l10n>
+    <iconFilename>icon_REAwheels.dds</iconFilename>
+	<multiplayer supported="true" />
+    <extraSourceFiles>
+        <sourceFile filename="REAwheels.lua" />
+    </extraSourceFiles>
+</modDesc>
