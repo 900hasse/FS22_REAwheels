@@ -1610,50 +1610,50 @@ end
 
 
 function REAwheels:onMissionLoadFromSavegame(xmlFile)
-    self.showGuidanceLines = xmlFile:getBool("guidanceSteering.settings.showGuidanceLines", true)
-    self.guidanceTerrainAngleIsActive = xmlFile:getBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", true)
-    self.lineOffset = xmlFile:getFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
-
-    xmlFile:iterate("guidanceSteering.tracks.track", function(_, key)
-        local track = {}
-
-        track.name = xmlFile:getString(key .. "#name")
-        track.strategy = xmlFile:getInt(key .. "#strategy")
-        track.method = xmlFile:getInt(key .. "#method")
-        track.farmId = xmlFile:getInt(key .. "#farmId", AccessHandler.EVERYONE)
-
-        track.guidanceData = {}
-        track.guidanceData.width = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#width", GlobalPositioningSystem.DEFAULT_WIDTH), 3)
-        track.guidanceData.offsetWidth = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#offsetWidth", GlobalPositioningSystem.DEFAULT_OFFSET), 3)
-        track.guidanceData.snapDirection = xmlFile:getVector(key .. ".guidanceData#snapDirection")
-        track.guidanceData.driveTarget = xmlFile:getVector(key .. ".guidanceData#driveTarget")
-
-        table.addElement(self.savedTracks, track)
-    end)
+--    self.showGuidanceLines = xmlFile:getBool("guidanceSteering.settings.showGuidanceLines", true)
+--    self.guidanceTerrainAngleIsActive = xmlFile:getBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", true)
+--    self.lineOffset = xmlFile:getFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
+--
+--    xmlFile:iterate("guidanceSteering.tracks.track", function(_, key)
+--        local track = {}
+--
+--        track.name = xmlFile:getString(key .. "#name")
+--        track.strategy = xmlFile:getInt(key .. "#strategy")
+--        track.method = xmlFile:getInt(key .. "#method")
+--        track.farmId = xmlFile:getInt(key .. "#farmId", AccessHandler.EVERYONE)
+--
+--        track.guidanceData = {}
+--        track.guidanceData.width = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#width", GlobalPositioningSystem.DEFAULT_WIDTH), 3)
+--        track.guidanceData.offsetWidth = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#offsetWidth", GlobalPositioningSystem.DEFAULT_OFFSET), 3)
+--        track.guidanceData.snapDirection = xmlFile:getVector(key .. ".guidanceData#snapDirection")
+--        track.guidanceData.driveTarget = xmlFile:getVector(key .. ".guidanceData#driveTarget")
+--
+--        table.addElement(self.savedTracks, track)
+--    end)
 end
 
 
 function REAwheels:onMissionSaveToSavegame(xmlFile)
-    xmlFile:setInt("guidanceSteering#version", 1)
-    xmlFile:setBool("guidanceSteering.settings.showGuidanceLines", self.showGuidanceLines)
-    xmlFile:setBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", self.guidanceTerrainAngleIsActive)
-    xmlFile:setFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
-
-    if self.savedTracks ~= nil then
-        for i, track in ipairs(self.savedTracks) do
-            local key = ("guidanceSteering.tracks.track(%d)"):format(i - 1)
-
-            xmlFile:setInt(key .. "#id", i)
-            xmlFile:setString(key .. "#name", track.name)
-            xmlFile:setInt(key .. "#strategy", track.strategy)
-            xmlFile:setInt(key .. "#method", track.method)
-            xmlFile:setInt(key .. "#farmId", track.farmId)
-            xmlFile:setFloat(key .. ".guidanceData#width",track.guidanceData.width)
-            xmlFile:setFloat(key .. ".guidanceData#offsetWidth",track.guidanceData.offsetWidth)
-            xmlFile:setVector(key .. ".guidanceData#snapDirection",track.guidanceData.snapDirection)
-            xmlFile:setVector(key .. ".guidanceData#driveTarget",track.guidanceData.driveTarget)
-        end
-    end
+--    xmlFile:setInt("guidanceSteering#version", 1)
+--    xmlFile:setBool("guidanceSteering.settings.showGuidanceLines", self.showGuidanceLines)
+--    xmlFile:setBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", self.guidanceTerrainAngleIsActive)
+--    xmlFile:setFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
+--
+--    if self.savedTracks ~= nil then
+--        for i, track in ipairs(self.savedTracks) do
+--            local key = ("guidanceSteering.tracks.track(%d)"):format(i - 1)
+--
+--            xmlFile:setInt(key .. "#id", i)
+--            xmlFile:setString(key .. "#name", track.name)
+--            xmlFile:setInt(key .. "#strategy", track.strategy)
+--            xmlFile:setInt(key .. "#method", track.method)
+--            xmlFile:setInt(key .. "#farmId", track.farmId)
+--            xmlFile:setFloat(key .. ".guidanceData#width",track.guidanceData.width)
+--            xmlFile:setFloat(key .. ".guidanceData#offsetWidth",track.guidanceData.offsetWidth)
+--            xmlFile:setVector(key .. ".guidanceData#snapDirection",track.guidanceData.snapDirection)
+--            xmlFile:setVector(key .. ".guidanceData#driveTarget",track.guidanceData.driveTarget)
+--        end
+--    end
 end
 
 
