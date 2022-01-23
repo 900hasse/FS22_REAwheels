@@ -28,8 +28,6 @@ function REAwheels.prerequisitesPresent(specializations)
     return true
 end;
 
-function REAwheels:loadMap(name)
-end
 
 function REAwheels:update(dt)
 	-----------------------------------------------------------------------------------
@@ -37,6 +35,7 @@ function REAwheels:update(dt)
 	-----------------------------------------------------------------------------------
 	-- Save global values
 	if REAwheels.GlobalValuesSet ~= true then
+	
 		-----------------------------------------------------------------------------------
 		-- Global settings of wheel tiretypes and friction
 		-----------------------------------------------------------------------------------
@@ -161,6 +160,7 @@ function REAwheels:update(dt)
 	-- Read wetness from gound
 	-----------------------------------------------------------------------------------
 	REAwheels.GroundWetnessFactor = g_currentMission.environment.weather:getGroundWetness();
+
 
 	-----------------------------------------------------------------------------------
 	-- Add REA functionality
@@ -1063,7 +1063,7 @@ function REAwheels:REAupdateWheelSink(wheel, dt, groundWetness)
 						WheelWidth = WheelWidth+(wheel.CrawlerTrackLength/2);
 					end;
 					-- Calculate loadfactor
-					loadFactor = MathUtil.clamp((tireLoad / WheelWidth) / 5 ,0 , 1);
+					loadFactor = MathUtil.clamp((tireLoad / WheelWidth) / 8 ,0 , 1);
  
 					-- If REA dynamic dirt is loaded and wheel in standing
 					local wetnessFactor = groundWetness;
@@ -1609,6 +1609,54 @@ function REAwheels:FrontLoaderOnLoad(savegame)
 end
 
 
+function REAwheels:onMissionLoadFromSavegame(xmlFile)
+    self.showGuidanceLines = xmlFile:getBool("guidanceSteering.settings.showGuidanceLines", true)
+    self.guidanceTerrainAngleIsActive = xmlFile:getBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", true)
+    self.lineOffset = xmlFile:getFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
+
+    xmlFile:iterate("guidanceSteering.tracks.track", function(_, key)
+        local track = {}
+
+        track.name = xmlFile:getString(key .. "#name")
+        track.strategy = xmlFile:getInt(key .. "#strategy")
+        track.method = xmlFile:getInt(key .. "#method")
+        track.farmId = xmlFile:getInt(key .. "#farmId", AccessHandler.EVERYONE)
+
+        track.guidanceData = {}
+        track.guidanceData.width = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#width", GlobalPositioningSystem.DEFAULT_WIDTH), 3)
+        track.guidanceData.offsetWidth = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#offsetWidth", GlobalPositioningSystem.DEFAULT_OFFSET), 3)
+        track.guidanceData.snapDirection = xmlFile:getVector(key .. ".guidanceData#snapDirection")
+        track.guidanceData.driveTarget = xmlFile:getVector(key .. ".guidanceData#driveTarget")
+
+        table.addElement(self.savedTracks, track)
+    end)
+end
+
+
+function REAwheels:onMissionSaveToSavegame(xmlFile)
+    xmlFile:setInt("guidanceSteering#version", 1)
+    xmlFile:setBool("guidanceSteering.settings.showGuidanceLines", self.showGuidanceLines)
+    xmlFile:setBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", self.guidanceTerrainAngleIsActive)
+    xmlFile:setFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
+
+    if self.savedTracks ~= nil then
+        for i, track in ipairs(self.savedTracks) do
+            local key = ("guidanceSteering.tracks.track(%d)"):format(i - 1)
+
+            xmlFile:setInt(key .. "#id", i)
+            xmlFile:setString(key .. "#name", track.name)
+            xmlFile:setInt(key .. "#strategy", track.strategy)
+            xmlFile:setInt(key .. "#method", track.method)
+            xmlFile:setInt(key .. "#farmId", track.farmId)
+            xmlFile:setFloat(key .. ".guidanceData#width",track.guidanceData.width)
+            xmlFile:setFloat(key .. ".guidanceData#offsetWidth",track.guidanceData.offsetWidth)
+            xmlFile:setVector(key .. ".guidanceData#snapDirection",track.guidanceData.snapDirection)
+            xmlFile:setVector(key .. ".guidanceData#driveTarget",track.guidanceData.driveTarget)
+        end
+    end
+end
+
+
 if REAwheels.ModActivated == nil then
 
 	addModEventListener(REAwheels);
@@ -1616,7 +1664,7 @@ if REAwheels.ModActivated == nil then
 	--WORK
 	REAwheels.ModActivated = true;
 	REAwheels.DebugForce = false;
-	REAwheels.DebugSink = true;
+	REAwheels.DebugSink = false;
 	REAwheels.FilePath = g_currentModDirectory;
 	REAwheels.GroundWetnessFactor = 0;
 	REAwheels.SeasonsLoaded = false;
