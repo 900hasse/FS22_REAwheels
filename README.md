@@ -25,3 +25,4 @@ created by "REA Dynamic dirt" decrease friction and increase sink of wheels.
 
 1.1.0.0
 Corrected error where moving speed of wheel was measured in the wrong position
+Added digging of wheels
