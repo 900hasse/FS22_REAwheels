@@ -46,10 +46,10 @@ function REAwheels:update(dt)
 		local TireTypeCRAWLER = 4;
 
 		-- Groundtypes
-		local ROAD = 1;
-		local HARD_TERRAIN = 2;
-		local SOFT_TERRAIN = 3;
-		local FIELD = 4;
+		local ROAD = WheelsUtil.GROUND_ROAD;
+		local HARD_TERRAIN = WheelsUtil.GROUND_HARD_TERRAIN;
+		local SOFT_TERRAIN = WheelsUtil.GROUND_SOFT_TERRAIN;
+		local FIELD = WheelsUtil.GROUND_FIELD;
 
 		-- TireType sink parameters
 		REAwheels.TireTypeMaxSinkFrictionReduced = {1,1,1,1};
@@ -315,10 +315,10 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 				end;
 
 				-- Ground types
-				local ROAD = 1;
-				local HARD_TERRAIN = 2;
-				local SOFT_TERRAIN = 3;
-				local FIELD = 4;
+				local ROAD = WheelsUtil.GROUND_ROAD;
+				local HARD_TERRAIN = WheelsUtil.GROUND_HARD_TERRAIN;
+				local SOFT_TERRAIN = WheelsUtil.GROUND_SOFT_TERRAIN;
+				local FIELD = WheelsUtil.GROUND_FIELD;
 				-- Get ground type
 				local groundType = 0;
 				if wheel.densityType ~= nil and wheel.lastColor[4] ~= nil then
@@ -783,8 +783,9 @@ function REAwheels:GetOnSoftGround(wheel)
 		local depth = wheel.lastColor[4];
 		groundType = WheelsUtil.getGroundType(isOnField, isOnRoad, depth);
 	end;
+	-- Check if on soft ground
 	local WheelIsOnSoftGround = false;
-	if (groundType == 3 or groundType == 4) or (wheel.lastTerrainValue > 0 and wheel.lastTerrainValue < 5) then
+	if groundType == WheelsUtil.GROUND_HARD_TERRAIN or groundType == WheelsUtil.GROUND_SOFT_TERRAIN or groundType == WheelsUtil.GROUND_FIELD then
 		WheelIsOnSoftGround = true;
 	end;
 	return WheelIsOnSoftGround;
@@ -1118,7 +1119,7 @@ function REAwheels:REAupdateWheelSink(wheel, dt, groundWetness)
 				local ExpectedDistance = wheel.ExpectedDistanceTraveled;
 				local ActualDistance = wheel.ActualDistanceTraveled;
 				-- Increas sink
-				if wheel.contact ~= Wheels.WHEEL_NO_CONTACT and REAwheels:GetOnSoftGround(wheel) then
+				if wheel.contact ~= Wheels.WHEEL_NO_CONTACT and wheel.contact ~= Wheels.WHEEL_OBJ_CONTACT and REAwheels:GetOnSoftGround(wheel) then
 					if ExpectedDistance > ActualDistance then
 						-- If sink has not reached the limit add more sink
 						if wheel.SinkFromSpinning >= WheelRadiusMaxSink then
@@ -1155,10 +1156,10 @@ function REAwheels:REAupdateWheelSink(wheel, dt, groundWetness)
 				end;
 				-- Decrease sink
 				if wheel.SinkFromSpinning > 0 then
-					-- Calculate how much sink should be lowered
-					local MinDecreaseSinkPerMeter = 0.3;
 					-- Decrease sink by rolling the wheel
 					if ActualDistance > 0 then
+						-- Calculate how much sink should be lowered
+						local MinDecreaseSinkPerMeter = 0.3;
 						wheel.SinkFromSpinning = wheel.SinkFromSpinning - (ActualDistance * MinDecreaseSinkPerMeter);
 					end;
 					if wheel.SinkFromSpinning < 0 then
