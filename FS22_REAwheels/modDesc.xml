@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
 <modDesc descVersion="63">
     <author>900Hasse</author>
-	<version>1.1.0.0</version>
+	<version>1.1.0.1</version>
 	<title>
         <en>REA22 Wheels</en>
     </title>
@@ -36,6 +36,9 @@ created by "REA Dynamic dirt" decrease friction and increase sink of wheels.
 Corrected error where moving speed of wheel was measured in the wrong position
 Added digging of wheels
 
+1.1.0.1
+Ground wetness is slowed down to get a more even transition from dry to wet.
+Ground wetness is saved to avoid restart of water level after loading of game.
 
 ]]>
 </en>

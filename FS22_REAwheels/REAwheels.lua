@@ -3,7 +3,7 @@
 -- author: 900Hasse
 -- date: 23.11.2022
 --
--- V1.1.0.0
+-- V1.1.0.1
 --
 -----------------------------------------
 -- TO DO
@@ -159,8 +159,9 @@ function REAwheels:update(dt)
 	-----------------------------------------------------------------------------------
 	-- Read wetness from gound
 	-----------------------------------------------------------------------------------
-	REAwheels.GroundWetnessFactor = g_currentMission.environment.weather:getGroundWetness();
-
+	if g_server ~= nil then
+		REAwheels:UpdateGroundWetness();
+	end;
 
 	-----------------------------------------------------------------------------------
 	-- Add REA functionality
@@ -231,6 +232,117 @@ end;
 
 
 --------------------------------------------------------------------
+-- Function to calculate and update ground wetness
+--------------------------------------------------------------------
+function REAwheels:UpdateGroundWetness()
+	-- MaxWetnessFactor
+	local MaxWetness = 1;
+	-- Water level change, %/hour
+	local WaterLevelChange = {};
+	WaterLevelChange.RatePerHour = {};
+	WaterLevelChange.RatePerHour[WeatherType.SUN] = -0.050;
+	WaterLevelChange.RatePerHour[WeatherType.CLOUDY] = -0.030;
+	WaterLevelChange.RatePerHour[WeatherType.RAIN] = 0.175;
+	WaterLevelChange.RatePerHour[WeatherType.SNOW] = 0.000;
+	-- Get wetness factor
+	REAwheels.LastUpdateTime,REAwheels.GroundWetnessFactor = REAwheels:GetWetnessFactor(WaterLevelChange.RatePerHour,MaxWetness,REAwheels.LastUpdateTime,REAwheels.GroundWetnessFactor);
+	-- DEBUG
+	if REAwheels.DebugWetness then
+		renderText(0.2, 0.15, 0.03,"Wetness REA: " .. REAwheels.GroundWetnessFactor);
+		renderText(0.2, 0.20, 0.03,"Wetness Vanilla: " .. g_currentMission.environment.weather:getGroundWetness());
+	end;
+end;
+
+
+-----------------------------------------------------------------------------------	
+-- Get weather type
+-----------------------------------------------------------------------------------
+function REAwheels:GetWeatherType()
+	local ActiveWeatherType = WeatherType.SUN;
+	if g_currentMission ~= nil and g_currentMission.environment ~= nil then
+		local CurrentWeather = g_currentMission.environment.weather:getCurrentWeatherType();
+		if CurrentWeather >= WeatherType.SUN and CurrentWeather <= WeatherType.SNOW then
+			ActiveWeatherType = CurrentWeather;
+		end;
+	end;
+	return ActiveWeatherType;
+end
+
+
+-----------------------------------------------------------------------------------	
+-- Get level change
+-----------------------------------------------------------------------------------
+function REAwheels:GetLevelChange(RatePerHour,ElapsedTimeMS)
+	-- Get rate per hour for current weather
+	local CurrentWeatherType = REAwheels:GetWeatherType();
+	local FactorChange = RatePerHour[CurrentWeatherType];
+	-- If rain, get rain scale
+	if CurrentWeatherType == WeatherType.RAIN then
+		FactorChange = FactorChange * g_currentMission.environment.weather:getRainFallScale();
+	end;
+	-- If drying, get temperature
+	if FactorChange < 0 then
+		local TemperatureDryFactor = MathUtil.clamp(g_currentMission.environment.weather:getCurrentTemperature() / 10, 0, 1);
+		FactorChange = FactorChange * TemperatureDryFactor;
+	end;
+	-- Calculate hour/change
+	local SecondsPerHour = 3600;
+	local MsPerSecond = 1000;
+	return ((ElapsedTimeMS/MsPerSecond)/SecondsPerHour)*FactorChange;
+end
+
+
+-----------------------------------------------------------------------------------	
+-- Get wetness factor
+-----------------------------------------------------------------------------------
+function REAwheels:GetWetnessFactor(RatePerHour,MaxWaterLevel,LastUpdateTime,CurrentWetness)
+	-- Read current time
+	local CurrentTime = g_currentMission.environment.dayTime;
+	-- Get in game time differance since last update
+	local TimeDiff = math.max(0,CurrentTime - LastUpdateTime);
+	-- Level change
+	local LevelChange = 0;
+	if TimeDiff > 0 and LastUpdateTime ~= 0 then
+		LevelChange = REAwheels:GetLevelChange(RatePerHour,TimeDiff);
+	end;
+	-- Return water level factor
+	return CurrentTime,MathUtil.clamp(CurrentWetness + LevelChange, 0, MaxWaterLevel);
+end
+
+
+--------------------------------------------------------------------
+-- Function to calculate in game time differance from last call
+--------------------------------------------------------------------
+function REAwheels:GetTimeDiff(LastTime)
+	-- Initiate last time if this is the first call
+	if LastTime == nil then
+		LastTime = g_currentMission.environment.dayTime;
+	end;
+	-- Get current time
+	local CurrentTime = g_currentMission.environment.dayTime;
+	-- Get in game time differance since last update, midnight timediff is ignored
+	local TimeDiff = math.max(0,CurrentTime - LastTime);
+	-- Save current time to compare next time
+	LastTime = CurrentTime;
+	-- Return time differance
+	return TimeDiff;
+end;
+
+
+--------------------------------------------------------------------
+-- Function to get current ground wetness
+--------------------------------------------------------------------
+function REAwheels:GetGroundWetness()
+	-- Return REA ground wetness if server
+	if g_server ~= nil then
+		return REAwheels.GroundWetnessFactor;
+	else
+		return g_currentMission.environment.weather:getGroundWetness();
+	end;
+end;
+
+
+--------------------------------------------------------------------
 -- Function to set friction coefficient of dry and wet ground
 --------------------------------------------------------------------
 function REAwheels:SetFrictionCoeff(TireType,Groundtype,CoeffDry,CoeffFactorWet,CoeffFactorSnow)
@@ -287,8 +399,6 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 				REAwheels:UpdateWheelDirectionAndSpeed(wheel,dt);
 				-- Update wheel distance based on xDrive
 				REAwheels:WheelDistanceFromXdrive(wheel,dt);
-
-
 				-- Determine type of tire based on tiretrackindex
 				REAwheels:UpdateTireType(spec_wheels,wheel);
 				-- Small wheels
@@ -314,18 +424,6 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 					end;
 				end;
 
-				-- Ground types
-				local ROAD = WheelsUtil.GROUND_ROAD;
-				local HARD_TERRAIN = WheelsUtil.GROUND_HARD_TERRAIN;
-				local SOFT_TERRAIN = WheelsUtil.GROUND_SOFT_TERRAIN;
-				local FIELD = WheelsUtil.GROUND_FIELD;
-				-- Get ground type
-				local groundType = 0;
-				if wheel.densityType ~= nil and wheel.lastColor[4] ~= nil then
-					local isOnField = wheel.densityType ~= 0;
-					local depth = wheel.lastColor[4];
-					groundType = WheelsUtil.getGroundType(isOnField, wheel.contact ~= Wheels.WHEEL_GROUND_CONTACT, depth);
-				end;
 				-- Read width and Radius to use when calculating frictino
 				local ActWheeleWidth = wheel.width;
 				local ActWheeleRadius = wheel.radiusOriginal;
@@ -481,14 +579,15 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 						------------------------------------------------------
 						-- Calculate force to add
 						if wheel.SideWaySpeed >= MinSpeedToAddForce then
-							-- Rolling reistance coefficient = sqrt(WheelSink(m)*((WheelRadius(m)*2)))
 							-- Min sink depending on groundtype
+							local GroundType = REAwheels:GetGroundType(wheel);
 							local MinSink = 0;
-							if groundType == SOFT_TERRAIN then
+							if GroundType == WheelsUtil.GROUND_SOFT_TERRAIN then
 								MinSink = 0.04;
-							elseif groundType == FIELD then
+							elseif GroundType == WheelsUtil.GROUND_FIELD then
 								MinSink = 0.06;
 							end;
+							-- Rolling reistance coefficient = sqrt(WheelSink(m)*((WheelRadius(m)*2)))
 							-- Calculate coefficient
 							local ActWheelRollConf = math.sqrt(math.max(MinSink,ActWheelSink)/(ActWheeleRadius*2));
 							-- If coefficient to low use min value
@@ -529,12 +628,15 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 							local SidewayDirection = "Sideway: D=" .. wheel.SideWayMovingDirection .. " / S=" .. REAwheels:RoundValueTwoDecimals(wheel.SideWaySpeed) .. " / F=" .. REAwheels:RoundValueTwoDecimals(wheel.SideWayMovingDirection*SidewayForceToAdd);
 							local Posistion = getName(wheel.repr);
 							DebugUtil.drawDebugNode(wheel.REASpeedNode,Posistion .. " Sink:" .. REAwheels:RoundValueTwoDecimals(ActWheelSink) .. " " .. RollingDirection .. ", " .. SidewayDirection .. ", Load:" .. REAwheels:RoundValueTwoDecimals(wheel.SmootheWheelLoad) .. ", Fric:" .. REAwheels:RoundValueTwoDecimals(wheel.frictionScale), false)
-
-							--local RollingDirection ="Rolling: D=" .. wheel.RollingMovingDirection .. " F=" .. REAwheels:RoundValueTwoDecimals(-(wheel.RollingMovingDirection*RollingForceToAdd)) .. " S=" .. REAwheels:RoundValueTwoDecimals(wheel.RollingDirectionSpeed)
-							--local SidewayDirection ="Sideway: D=" .. wheel.SideWayMovingDirection .. " F=" .. REAwheels:RoundValueTwoDecimals(-(wheel.SideWayMovingDirection*SidewayForceToAdd)) .. " S=" .. REAwheels:RoundValueTwoDecimals(wheel.SideWaySpeed)
-							--local Nothing,TireTypeName = REAwheels:DetermineTireType(wheel.tireTrackAtlasIndex);
-							--DebugUtil.drawDebugNode(wheel.repr,"Max/Act: " .. wheel.maxDeformation .. " / " .. REAwheels:RoundValueTwoDecimals(wheel.deformation) .. " " .. RimRadius, false)
-							--DebugUtil.drawDebugNode(wheel.repr,"Org/New: " .. REAwheels:RoundValueTwoDecimals(wheel.OrgFrictionScale) .. " / " .. REAwheels:RoundValueTwoDecimals(wheel.frictionScale) .. " " .. TireTypeName, false)
+						end;
+						if REAwheels.DebugGroundType then
+							-- Groundtypes
+							local GroundTypeName = {};
+							GroundTypeName[WheelsUtil.GROUND_ROAD] = "ROAD";
+							GroundTypeName[WheelsUtil.GROUND_HARD_TERRAIN] = "HARD";
+							GroundTypeName[WheelsUtil.GROUND_SOFT_TERRAIN] = "SOFT";
+							GroundTypeName[WheelsUtil.GROUND_FIELD] = "FIELD";
+							DebugUtil.drawDebugNode(wheel.REASpeedNode,"GroundType: " .. GroundTypeName[REAwheels:GetGroundType(wheel)], false);
 						end;
 					end;
 				end;
@@ -543,6 +645,20 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 	end;
 end;
 
+
+-----------------------------------------------------------------------------------	
+-- Function to get groundtye
+-----------------------------------------------------------------------------------
+function REAwheels:GetGroundType(wheel)
+	-- Get ground type
+	local groundType = 0;
+	if wheel.densityType ~= nil and wheel.lastColor[4] ~= nil then
+		local isOnField = wheel.densityType ~= 0;
+		local depth = wheel.lastColor[4];
+		groundType = WheelsUtil.getGroundType(isOnField, wheel.contact ~= Wheels.WHEEL_GROUND_CONTACT, depth);
+	end;
+	return groundType;
+end
 
 -----------------------------------------------------------------------------------	
 -- Function to determine which tireType based on tireTrackAtlasIndex
@@ -776,13 +892,7 @@ end
 -----------------------------------------------------------------------------------
 function REAwheels:GetOnSoftGround(wheel)
 	-- Get ground type
-	local groundType = 0;
-	if wheel.lastColor[4] ~= nil then
-		local isOnField = false;
-		local isOnRoad = false;
-		local depth = wheel.lastColor[4];
-		groundType = WheelsUtil.getGroundType(isOnField, isOnRoad, depth);
-	end;
+	local groundType = REAwheels:GetGroundType(wheel);
 	-- Check if on soft ground
 	local WheelIsOnSoftGround = false;
 	if groundType == WheelsUtil.GROUND_HARD_TERRAIN or groundType == WheelsUtil.GROUND_SOFT_TERRAIN or groundType == WheelsUtil.GROUND_FIELD then
@@ -1001,6 +1111,8 @@ function REAwheels:REAupdateWheelSink(wheel, dt, groundWetness)
 
 			-----------------------------------------
 			-- REA 
+			-- Use ground wetness
+			groundWetness = REAwheels:GetGroundWetness();
 			-- Get wheel speed
 			local WheelSpeed = 0;
 			if wheel.RollingDirectionSpeed ~= nil and wheel.SideWaySpeed ~= nil and wheel.SpeedBasedOnXdrive ~= nil then
@@ -1221,7 +1333,7 @@ function REAwheels:REAonUpdateTick(dt, isActiveForInput, isActiveForInputIgnoreS
         end
     end
     if self.isClient then
-        local groundWetness = REAwheels.GroundWetnessFactor;
+        local groundWetness = REAwheels:GetGroundWetness();
         local groundIsWet = groundWetness > 0.15
         for _,wheel in pairs(spec.wheels) do
             if wheel.driveGroundParticleSystems ~= nil then
@@ -1610,53 +1722,73 @@ function REAwheels:FrontLoaderOnLoad(savegame)
 end
 
 
-function REAwheels:onMissionLoadFromSavegame(xmlFile)
---    self.showGuidanceLines = xmlFile:getBool("guidanceSteering.settings.showGuidanceLines", true)
---    self.guidanceTerrainAngleIsActive = xmlFile:getBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", true)
---    self.lineOffset = xmlFile:getFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
---
---    xmlFile:iterate("guidanceSteering.tracks.track", function(_, key)
---        local track = {}
---
---        track.name = xmlFile:getString(key .. "#name")
---        track.strategy = xmlFile:getInt(key .. "#strategy")
---        track.method = xmlFile:getInt(key .. "#method")
---        track.farmId = xmlFile:getInt(key .. "#farmId", AccessHandler.EVERYONE)
---
---        track.guidanceData = {}
---        track.guidanceData.width = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#width", GlobalPositioningSystem.DEFAULT_WIDTH), 3)
---        track.guidanceData.offsetWidth = MathUtil.round(xmlFile:getFloat(key .. ".guidanceData#offsetWidth", GlobalPositioningSystem.DEFAULT_OFFSET), 3)
---        track.guidanceData.snapDirection = xmlFile:getVector(key .. ".guidanceData#snapDirection")
---        track.guidanceData.driveTarget = xmlFile:getVector(key .. ".guidanceData#driveTarget")
---
---        table.addElement(self.savedTracks, track)
---    end)
+-----------------------------------------------------------------------------------	
+-- Edited Wheels:updateWheelFriction to unlock frontloader axis
+-----------------------------------------------------------------------------------
+function REAwheels:updateWheelFriction(wheel, dt, groundWetness)
+    if self.isServer then
+        local isOnField = wheel.densityType ~= 0
+        local depth = wheel.lastColor[4]
+
+		-- Get REA wetness
+		local REAGroundWetness = REAwheels:GetGroundWetness();
+
+        local snowScale = 0
+        if wheel.hasSnowContact then
+            REAGroundWetness = 0
+            snowScale = 1
+        end
+
+        local groundType = WheelsUtil.getGroundType(isOnField, wheel.contact ~= Wheels.WHEEL_GROUND_CONTACT, depth)
+        local coeff = WheelsUtil.getTireFriction(wheel.tireType, groundType, REAGroundWetness, snowScale)
+        if self:getLastSpeed() > 0.2 then
+            if coeff ~= wheel.tireGroundFrictionCoeff then
+                wheel.tireGroundFrictionCoeff = coeff
+                self:setWheelTireFrictionDirty(wheel)
+            end
+        end
+    end
 end
 
 
-function REAwheels:onMissionSaveToSavegame(xmlFile)
---    xmlFile:setInt("guidanceSteering#version", 1)
---    xmlFile:setBool("guidanceSteering.settings.showGuidanceLines", self.showGuidanceLines)
---    xmlFile:setBool("guidanceSteering.settings.guidanceTerrainAngleIsActive", self.guidanceTerrainAngleIsActive)
---    xmlFile:setFloat("guidanceSteering.settings.lineOffset", self.lineOffset)
---
---    if self.savedTracks ~= nil then
---        for i, track in ipairs(self.savedTracks) do
---            local key = ("guidanceSteering.tracks.track(%d)"):format(i - 1)
---
---            xmlFile:setInt(key .. "#id", i)
---            xmlFile:setString(key .. "#name", track.name)
---            xmlFile:setInt(key .. "#strategy", track.strategy)
---            xmlFile:setInt(key .. "#method", track.method)
---            xmlFile:setInt(key .. "#farmId", track.farmId)
---            xmlFile:setFloat(key .. ".guidanceData#width",track.guidanceData.width)
---            xmlFile:setFloat(key .. ".guidanceData#offsetWidth",track.guidanceData.offsetWidth)
---            xmlFile:setVector(key .. ".guidanceData#snapDirection",track.guidanceData.snapDirection)
---            xmlFile:setVector(key .. ".guidanceData#driveTarget",track.guidanceData.driveTarget)
---        end
---    end
+-----------------------------------------------------------------------------------	
+-- Load ground wetness factor 
+-----------------------------------------------------------------------------------
+function REAwheels.loadedMission(mission, node)
+    if mission:getIsServer() then
+        if mission.missionInfo.savegameDirectory ~= nil and fileExists(mission.missionInfo.savegameDirectory .. "/REAWheels.xml") then
+            local xmlFile = XMLFile.load("REAWheelsXML", mission.missionInfo.savegameDirectory .. "/REAWheels.xml")
+            if xmlFile ~= nil then
+				REAwheels.GroundWetnessFactor = xmlFile:getFloat("REAwheels.GroundWetnessFactor", REAwheels.GroundWetnessFactor)
+                xmlFile:delete()
+				print("------------------------------------")
+				print("REA Wheels")
+				print("loaded water wetness factor XML")
+				print("File: " .. mission.missionInfo.savegameDirectory .. "/REAWheels.xml")
+				print("Value: " .. REAwheels.GroundWetnessFactor)
+				print("------------------------------------")
+            end
+        end
+    end
+    if mission.cancelLoading then
+        return
+    end
 end
 
+
+-----------------------------------------------------------------------------------	
+-- Save ground wetness factor 
+-----------------------------------------------------------------------------------
+function REAwheels.saveToXMLFile(missionInfo)
+    if missionInfo.isValid then
+        local xmlFile = XMLFile.create("REAWheelsXML", missionInfo.savegameDirectory .. "/REAWheels.xml", "REAWheels")
+        if xmlFile ~= nil then
+			xmlFile:setFloat("REAwheels.GroundWetnessFactor", REAwheels.GroundWetnessFactor)
+            xmlFile:save()
+            xmlFile:delete()
+        end
+    end
+end
 
 if REAwheels.ModActivated == nil then
 
@@ -1666,15 +1798,22 @@ if REAwheels.ModActivated == nil then
 	REAwheels.ModActivated = true;
 	REAwheels.DebugForce = false;
 	REAwheels.DebugSink = false;
+	REAwheels.DebugWetness = false;
+	REAwheels.DebugGroundType = false;
 	REAwheels.FilePath = g_currentModDirectory;
 	REAwheels.GroundWetnessFactor = 0;
-	REAwheels.SeasonsLoaded = false;
+	REAwheels.LastUpdateTime = 0;
 	print("mod activated")
+
+	-- Connect saving and loading functions
+    Mission00.loadMission00Finished = Utils.appendedFunction(Mission00.loadMission00Finished, REAwheels.loadedMission);
+    FSCareerMissionInfo.saveToXMLFile = Utils.appendedFunction(FSCareerMissionInfo.saveToXMLFile, REAwheels.saveToXMLFile);
 
 	--WORK
 	-- Exchange standard GIANT'S functions for editet by REA
 	-- Change Giant's "Wheels" with REA adjusted
 	Wheels.updateWheelSink = REAwheels.REAupdateWheelSink;
+	Wheels.updateWheelFriction = REAwheels.updateWheelFriction;
 	FrontloaderAttacher.onLoad = REAwheels.FrontLoaderOnLoad;
 
 	--Wheels.onUpdateTick = REAwheels.REAonUpdateTick;
