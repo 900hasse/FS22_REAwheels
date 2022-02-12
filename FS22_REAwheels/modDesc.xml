@@ -18,55 +18,64 @@ the Manitou MC18 Forklift recive the same tire friction as a tractor.
 This mod fill the missing data based on tiretrack index making it universal.
 Different tiretypes now act completely different on different ground types and
 suffers differently on rain and sinking into the ground.
+
 This mod supports the 4 standard tiretypes: MUD, STREET, OFFROAD and CRAWLERS!
 Calculates friction based on size of tire making wide tires, duals and tracks worth the money for
 heavy fieldwork but the narrows suffers making it ideal for easier tasks in later growth state.
 Tire friction is calculated using width and radius.
 Track friction is calculated using width and track lenght.
-Adds rolling and sideway resistance meening: 
-More wheel load, small tires and soft ground = more force needed for pulling or pushing.
-Less wheel load, large tires and hard ground = less force needed for pulling or pushing.
-Front axel is no longer by default locked when a frontloader is attached.
-Deformation of tires is increased.
+Adds rolling and sideway resistance meening:
+- More wheel load, small tires and soft ground = more force needed for pulling or pushing.
+- Less wheel load, large tires and hard ground = less force needed for pulling or pushing.
+- Front axel is no longer by default locked when a frontloader is attached.
+- Deformation of tires is increased.
 
 Added support for "REA Dynamic dirt", driving into standing water
 created by "REA Dynamic dirt" decrease friction and increase sink of wheels.
 
 1.1.0.0
-Corrected error where moving speed of wheel was measured in the wrong position
-Added digging of wheels
+- Corrected error where moving speed of wheel was measured in the wrong position
+- Added digging of wheels
 
 1.1.0.1
-Ground wetness is slowed down to get a more even transition from dry to wet.
-Ground wetness is saved to avoid restart of water level after loading of game.
-
+- Ground wetness is slowed down to get a more even transition from dry to wet.
+- Ground wetness is saved to avoid restart of ground wetness after loading of game.
 ]]>
 </en>
 <de>
-<![CDATA[Das Ziel dieses Mods ist es, das Spiel realistischer zu machen und
-das Anpassen des Fahrzeugs für die Aufgabe lohnender.
-Das Ziel ist es, den Mod universell zu machen.
-Dieser Mod unterstützt Multiplayer und dedizierte Server.
+<![CDATA[Das Ziel dieses Mods ist es, das Spiel realistischer und
+die Anpassung des Fahrzeugs an die jeweilige Aufgabe lohnender zu machen.
+Es soll den Mod auch versuchen universell zu machen.
+Dieser Mod unterstützt den Multiplayer und dedizierte Server.
 Es sind keine XML-Änderungen erforderlich. Einige Daten aus XML werden überschrieben!
 
-Im Basisspiel berücksichtigen viele Fahrzeuge zum Beispiel den Reifentyp nicht
-Der Manitou MC18 Gabelstapler erhält die gleiche Reifenreibung wie ein Traktor.
-Dieser Mod füllt die fehlenden Daten basierend auf dem Reifenspurindex und macht ihn universell.
-Unterschiedliche Reifentypen verhalten sich jetzt auf unterschiedlichen Bodenarten völlig unterschiedlich und
-leidet unterschiedlich unter Regen und Einsinken im Boden.
-Dieser Mod unterstützt die 4 Standardreifentypen: MUD, STREET, OFFROAD und CRAWLERS!
-Berechnet die Reibung basierend auf der Reifengröße, wodurch Breitreifen, Doppelreifen und Ketten das Geld wert sind
-schwere Feldarbeit, aber die Enge leidet, was es ideal für leichtere Aufgaben im späteren Wachstumsstadium macht.
-Die Reifenreibung wird anhand von Breite und Radius berechnet.
+Im Basisspiel wird bei vielen Fahrzeugen der Reifentyp nicht berücksichtigt, so dass zum Beispiel
+der Manitou MC18 Gabelstapler die gleiche Reifenreibung wie ein Traktor hat.
+Dieser Mod füllt die fehlenden Daten auf der Grundlage des Reifenspurindexes auf und macht ihn damit universell.
+Verschiedene Reifentypen verhalten sich nun völlig unterschiedlich auf verschiedenen Bodenarten und
+leiden unterschiedlich unter Regen und Einsinken in den Boden.
+
+Dieser Mod unterstützt die 4 Standard-Reifentypen: MUD, STREET, OFFROAD und CRAWLERS!
+Berechnet die Reibung anhand der Reifengröße, so dass breite Reifen, Duals und Raupen das Geld für schwere Feldarbeit wert sind.
+Die Pflegereifen leiden bei schwerer Feldarbeit, sind ideal für leichtere Aufgaben im späteren Wachstumsstadium.
+Die Reibung der Reifen wird anhand der Breite und des Radius berechnet.
 Die Kettenreibung wird anhand von Breite und Kettenlänge berechnet.
 Fügt Roll- und Seitenwiderstand hinzu, was bedeutet:
-Mehr Radlast, kleine Reifen und weicher Untergrund = mehr Kraftaufwand beim Ziehen oder Schieben.
-Weniger Radlast, große Reifen und harter Boden = weniger Kraftaufwand beim Ziehen oder Schieben.
-Die Vorderachse ist nicht mehr standardmäßig gesperrt, wenn ein Frontlader angebaut ist.
-Die Verformung der Reifen wird erhöht.
+- Mehr Radlast, kleine Reifen und weicher Boden = mehr Kraftaufwand beim Ziehen oder Schieben.
+- Geringere Radlast, große Reifen und harter Boden = weniger Kraftaufwand beim Ziehen oder Schieben.
+- Die Vorderachse ist nicht mehr standardmäßig gesperrt, wenn ein Frontlader angebaut ist.
+- Die Verformung der Reifen wird erhöht.
 
-Unterstützung für "REA Dynamic Dirt", das Fahren in stehendes Wasser, hinzugefügt
-durch "REA Dynamic Dirt" erzeugt, verringern die Reibung und erhöhen das Einsinken der Räder.
+Unterstützung für "REA Dynamic Dirt". Fahren in stehendem Gewässer erstellt duch
+"REA Dynamic Dirt" verringert die Reibung und erhöht das Einsinken der Räder.
+
+1.1.0.0
+- Fehler behoben, bei dem die Bewegungsgeschwindigkeit des Rades an der falschen Position gemessen wurde
+- Graben von Rädern hinzugefügt
+
+1.1.0.1
+- Bodennässe wird verlangsamt, um einen gleichmäßigeren Übergang von trocken zu nass zu erhalten.
+- Bodennässe wird gespeichert, um einen Neustart der Bodennässe nach dem Laden des Spiels zu vermeiden.
 ]]>
 </de>
     </description>

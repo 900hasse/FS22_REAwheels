@@ -350,7 +350,9 @@ function REAwheels:SetFrictionCoeff(TireType,Groundtype,CoeffDry,CoeffFactorWet,
 	TireTypeName = {"MUD","OFFROAD","STREET","CRAWLERS"};
 	GroundTypeName = {"ROAD","HARD TERRAIN","SOFT TERRAIN","FIELD"};
 	-- Print original values
-	print("REAwheels: Original friction coefficient for tiretype '" .. TireTypeName[TireType] .. "' on groundtype '" .. GroundTypeName[Groundtype] .. "' Dry=" .. WheelsUtil.tireTypes[TireType].frictionCoeffs[Groundtype] .. ", Wet=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsWet[Groundtype] .. ", Snow=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsSnow[Groundtype])
+	if REAwheels.DebugFrictionCoeff then
+		print("REAwheels: Original friction coefficient for tiretype '" .. TireTypeName[TireType] .. "' on groundtype '" .. GroundTypeName[Groundtype] .. "' Dry=" .. WheelsUtil.tireTypes[TireType].frictionCoeffs[Groundtype] .. ", Wet=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsWet[Groundtype] .. ", Snow=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsSnow[Groundtype])
+	end;
 	-- Friction coefficient for dry ground
 	WheelsUtil.tireTypes[TireType].frictionCoeffs[Groundtype] = CoeffDry;
 	-- Friction coefficient for wet ground
@@ -358,7 +360,9 @@ function REAwheels:SetFrictionCoeff(TireType,Groundtype,CoeffDry,CoeffFactorWet,
 	-- Friction coefficient for snowy ground
 	WheelsUtil.tireTypes[TireType].frictionCoeffsSnow[Groundtype] = CoeffDry*CoeffFactorSnow;
 	-- Print edited values
-	print("REAwheels: Edited friction coefficient for tiretype '" .. TireTypeName[TireType] .. "' on groundtype '" .. GroundTypeName[Groundtype] .. "' Dry=" .. WheelsUtil.tireTypes[TireType].frictionCoeffs[Groundtype] .. ", Wet=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsWet[Groundtype] .. ", Snow=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsSnow[Groundtype])
+	if REAwheels.DebugFrictionCoeff then
+		print("REAwheels: Edited friction coefficient for tiretype '" .. TireTypeName[TireType] .. "' on groundtype '" .. GroundTypeName[Groundtype] .. "' Dry=" .. WheelsUtil.tireTypes[TireType].frictionCoeffs[Groundtype] .. ", Wet=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsWet[Groundtype] .. ", Snow=" .. WheelsUtil.tireTypes[TireType].frictionCoeffsSnow[Groundtype])
+	end;
 end;
 
 
@@ -1796,6 +1800,7 @@ if REAwheels.ModActivated == nil then
 
 	--WORK
 	REAwheels.ModActivated = true;
+	REAwheels.DebugFrictionCoeff = false;
 	REAwheels.DebugForce = false;
 	REAwheels.DebugSink = false;
 	REAwheels.DebugWetness = false;
