@@ -3,7 +3,7 @@
 -- author: 900Hasse
 -- date: 23.11.2022
 --
--- V1.1.0.1
+-- V1.1.0.2
 --
 -----------------------------------------
 -- TO DO
@@ -607,6 +607,10 @@ function REAwheels:UpdateWheels(spec_wheels,spec_crawlers,MotorizedVehicle,Power
 							end;
 							-- Factor of calulated farco to add
 							local SidewayResistanceForceFactor = 1.0;
+							if not MotorizedVehicle then
+								-- Lower value for implement (not motorized vehicle) wheels to prevent some tools to jump
+								SidewayResistanceForceFactor = 0.2
+							end
 							if PowerConsumerActivated then
 								SidewayResistanceForceFactor = SidewayResistanceForceFactor / 2;
 							end;
