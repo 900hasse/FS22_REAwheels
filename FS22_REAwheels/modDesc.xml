@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<modDesc descVersion="63">
+<modDesc descVersion="77">
     <author>900Hasse</author>
-	<version>1.1.0.1</version>
+	<version>1.1.0.2</version>
 	<title>
         <en>REA22 Wheels</en>
     </title>
@@ -40,6 +40,9 @@ created by "REA Dynamic dirt" decrease friction and increase sink of wheels.
 1.1.0.1
 - Ground wetness is slowed down to get a more even transition from dry to wet.
 - Ground wetness is saved to avoid restart of ground wetness after loading of game.
+
+1.1.0.2
+- Fixed implements that were jumping like disc harrow Kinze Mach Till 261 or Speed Tiller 465
 ]]>
 </en>
 <de>
@@ -76,6 +79,9 @@ Unterstützung für "REA Dynamic Dirt". Fahren in stehendem Gewässer erstellt d
 1.1.0.1
 - Bodennässe wird verlangsamt, um einen gleichmäßigeren Übergang von trocken zu nass zu erhalten.
 - Bodennässe wird gespeichert, um einen Neustart der Bodennässe nach dem Laden des Spiels zu vermeiden.
+
+1.1.0.2
+- Springende Geräte wie die Scheibenegge Kinze Mach Till 261 oder Speed Tiller 465 wurden korrigiert
 ]]>
 </de>
     </description>
